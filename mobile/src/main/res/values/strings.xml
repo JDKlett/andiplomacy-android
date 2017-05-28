@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">AnDiplomacy</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password (optional)</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"This application will make internet calls on your behalf."</string>
+    <string name="notification_title">"Diplomacy"</string>
+    <string name="notification_content">"You have new messages"</string>
+    <string name="service_running">"Checking process is up and running."</string>
+
+</resources>
