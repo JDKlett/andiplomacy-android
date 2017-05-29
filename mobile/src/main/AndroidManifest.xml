@@ -19,11 +19,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Dashboard"></activity>
-        <receiver
-            android:name=".OnNotificationDismissed"
-            android:exported="false" >
-        </receiver>
+        <activity android:name=".Dashboard"/>
     </application>
-
 </manifest>

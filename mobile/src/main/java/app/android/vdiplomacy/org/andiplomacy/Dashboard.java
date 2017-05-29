@@ -27,6 +27,7 @@ public class Dashboard extends AppCompatActivity {
     private int mInterval = 300;
     private boolean isNotificationShown = false;
     private BroadcastReceiver broadcastReceiver = null;
+    private BroadcastReceiver dismissReceiver = null;
     private CheckMessagesTask cmTask = null;
 
     @Override
@@ -41,6 +42,10 @@ public class Dashboard extends AppCompatActivity {
             }
         };
         registerReceiver(broadcastReceiver, new IntentFilter("NOTIFICATION_DISMISSED"));
+
+        dismissReceiver = new OnNotificationDismissed();
+        registerReceiver(dismissReceiver, new IntentFilter("NOTIFICATION_DELETE_REQUEST"));
+
         cmTask = new CheckMessagesTask();
         cmTask.execute((Void) null);
     }
@@ -61,23 +66,24 @@ public class Dashboard extends AppCompatActivity {
                     Log.d(getClass().getName(), "Game ["+id+"] has new messages.");
                     showNotification();
                 }
-            } catch (DiplomacyAuthenticationException e) {
+            } catch (Throwable e) {
                 //DO NOTHING
             }
         }
     }
 
     private void showNotification(){
-        Intent dismissNotificationIntent = new Intent(this, OnNotificationDismissed.class);
+        Intent dismissNotificationIntent = new Intent("NOTIFICATION_DELETE_REQUEST");
         isNotificationShown = true;
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this.getApplicationContext(), 0, dismissNotificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         Log.d("DEBUG", "Pending event created.");
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this.getApplicationContext());
         builder
                 .setContentTitle(getString(R.string.notification_title))
                 .setContentText(getString(R.string.notification_content))
                 .setSmallIcon(R.drawable.ic_message)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setAutoCancel(true)
                 .setDeleteIntent(pendingIntent);
         NotificationManager mNotificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

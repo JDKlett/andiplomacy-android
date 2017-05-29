@@ -11,10 +11,7 @@ public class OnNotificationDismissed extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.i("Set", "setting");
-        Log.i("Set", "setting");
         context.sendBroadcast(new Intent("NOTIFICATION_DISMISSED"));
-//        intent.getExtras().putBoolean("isDismissed", true);
     }
 
 }
