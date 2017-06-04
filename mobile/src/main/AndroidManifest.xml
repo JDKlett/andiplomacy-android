@@ -19,6 +19,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Dashboard"/>
+        <activity android:name=".Dashboard" />
+        <service
+            android:name=".CheckerService"
+            android:exported="false" />
     </application>
 </manifest>
