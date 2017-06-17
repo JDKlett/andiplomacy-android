@@ -49,43 +49,14 @@ public class LoginActivity extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(!DiplomacyClient.isConnected()) {
-            setContentView(R.layout.activity_login);
-            // Set up the login form.
-            mSignInview = (EditText) findViewById(R.id.text);
-            checkInternetPermission();
 
-            mPasswordView = (EditText) findViewById(R.id.password);
-            mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-                @Override
-                public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                    if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                        attemptLogin();
-                        return true;
-                    }
-                    return false;
-                }
-            });
+        UserPreLoginTask task = new UserPreLoginTask(this);
+        task.execute((Void) null);
 
-            Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-            mEmailSignInButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    attemptLogin();
-                }
-            });
-
-            mLoginFormView = findViewById(R.id.login_form);
-            mProgressView = findViewById(R.id.login_progress);
-        } else {
-            setContentView(R.layout.activity_dashboard);
-        }
     }
 
     private void checkInternetPermission() {
-        if (!requestInternet()) {
-            return;
-        }
+        requestInternet();
     }
 
     private boolean requestInternet() {
@@ -220,8 +191,70 @@ public class LoginActivity extends AppCompatActivity{
         }
     }
 
-
     /**
+     * Represents an asynchronous login/registration task used to authenticate
+     * the user.
+     */
+    public class UserPreLoginTask extends AsyncTask<Void, Void, Boolean> {
+
+        private Activity mActivity = null;
+
+        public UserPreLoginTask(Activity mActivity){
+            this.mActivity = mActivity;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            boolean isConnected = false;
+            try {
+                String cookie = CookieManager.loadCookie(getApplicationContext());
+                if(cookie!=null){
+                    isConnected = DiplomacyClient.login(cookie);
+                }
+            } catch (Exception e){
+                isConnected = false;
+            }
+            return isConnected;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            if(!success) {
+                setContentView(R.layout.activity_login);
+                // Set up the login form.
+                mSignInview = (EditText) findViewById(R.id.text);
+                checkInternetPermission();
+
+                mPasswordView = (EditText) findViewById(R.id.password);
+                mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                    @Override
+                    public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+                        if (id == R.id.login || id == EditorInfo.IME_NULL) {
+                            attemptLogin();
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+
+                Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+                mEmailSignInButton.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        attemptLogin();
+                    }
+                });
+
+                mLoginFormView = findViewById(R.id.login_form);
+                mProgressView = findViewById(R.id.login_progress);
+            } else {
+                Intent i = new Intent(mActivity, Dashboard.class);
+                finish();
+                startActivity(i);
+            }
+        }
+    }
+        /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
@@ -240,10 +273,16 @@ public class LoginActivity extends AppCompatActivity{
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
-                return DiplomacyClient.login(mEmail, mPassword);
+                if (DiplomacyClient.login(mEmail, mPassword) && DiplomacyClient.getCookie() != null) {
+                    //save cookie
+                    String cookie = DiplomacyClient.getCookie();
+                    CookieManager.saveCookie(getApplicationContext(), cookie);
+                    return true;
+                }
             } catch (Exception e) {
                 return false;
             }
+            return false;
         }
 
         @Override

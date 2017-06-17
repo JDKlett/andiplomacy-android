@@ -28,7 +28,6 @@ public class CheckerService extends IntentService {
     private static List<Integer> matches = null;
     private boolean isNotificationShown = false;
 
-    private int mInterval = 300;
     public CheckerService(){
         super("Checker Service");
     }
@@ -69,14 +68,30 @@ public class CheckerService extends IntentService {
             final String action = intent.getAction();
             if (ACTION_START.equals(action)) {
                 try {
-                    if(matches == null){
-                        matches = DiplomacyClient.getMatches();
-                    }
-                    for(Integer id: matches){
-                        if(!isNotificationShown && DiplomacyClient.checkMessages(id)){
-                            showNotification(this);
+
+                    if(DiplomacyClient.getCookie() == null){
+                        try {
+                            String cookie = CookieManager.loadCookie(getApplicationContext());
+                            if(cookie!=null){
+                                DiplomacyClient.login(cookie);
+                            }
+                        } catch (Exception e) {
+                            throw new DiplomacyAuthenticationException();
                         }
                     }
+
+                    if(DiplomacyClient.isConnected()) {
+                        if (matches == null) {
+                            matches = DiplomacyClient.getMatches();
+                        }
+
+                        for (Integer id : matches) {
+                            if (!isNotificationShown && DiplomacyClient.checkMessages(id)) {
+                                showNotification(this);
+                            }
+                        }
+                    }
+
                 } catch (DiplomacyAuthenticationException e) {
                     Log.e(getClass().getName(), e.getMessage());
                 }
